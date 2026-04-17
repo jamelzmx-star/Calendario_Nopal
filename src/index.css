@@ -1,0 +1,69 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Nunito:wght@400;500;600;700&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --verde-oscuro: #1a3a0a;
+  --verde-nopal: #2d6a18;
+  --verde-claro: #4a9e2f;
+  --verde-suave: #8cc870;
+  --arena: #f5e6c8;
+  --arena-oscura: #e8d0a0;
+  --terracota: #c4622d;
+  --terracota-claro: #e07a4a;
+  --marron: #6b3a1f;
+  --crema: #faf6ee;
+  --blanco: #ffffff;
+  --texto: #2c1a0e;
+  --texto-suave: #7a5c3e;
+  --pendiente: #c4622d;
+  --pagado: #2d6a18;
+  --sombra: 0 4px 20px rgba(26,58,10,0.12);
+  --sombra-hover: 0 8px 32px rgba(26,58,10,0.2);
+  --radio: 16px;
+  --radio-sm: 10px;
+  --radio-lg: 24px;
+}
+
+html { font-size: 16px; }
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--crema);
+  color: var(--texto);
+  min-height: 100vh;
+  background-image:
+    radial-gradient(circle at 20% 0%, rgba(76,158,47,0.08) 0%, transparent 50%),
+    radial-gradient(circle at 80% 100%, rgba(196,98,45,0.06) 0%, transparent 50%);
+}
+
+#root { min-height: 100vh; }
+h1, h2, h3 { font-family: 'Fraunces', serif; line-height: 1.2; }
+button { cursor: pointer; font-family: 'Nunito', sans-serif; border: none; outline: none; }
+input, select, textarea { font-family: 'Nunito', sans-serif; font-size: 1rem; outline: none; }
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--arena); }
+::-webkit-scrollbar-thumb { background: var(--verde-suave); border-radius: 3px; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.04); } }
+
+.fade-in { animation: fadeIn 0.4s ease both; }
+.slide-up { animation: slideUp 0.5s cubic-bezier(.22,1,.36,1) both; }
+
+.badge-pendiente {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: #fff3ee; color: var(--terracota);
+  padding: 3px 10px; border-radius: 20px;
+  font-size: 0.78rem; font-weight: 700;
+  border: 1.5px solid #f0c4a8;
+}
+.badge-pagado {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: #edf7e8; color: var(--verde-nopal);
+  padding: 3px 10px; border-radius: 20px;
+  font-size: 0.78rem; font-weight: 700;
+  border: 1.5px solid #b8e0a0;
+}

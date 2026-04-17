@@ -1,0 +1,201 @@
+.page {
+  padding: 24px 16px 100px;
+  max-width: 480px;
+  margin: 0 auto;
+  animation: fadeIn 0.35s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.header { margin-bottom: 20px; }
+.titulo { font-size: 1.4rem; color: var(--verde-oscuro); }
+
+.navMes {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--verde-oscuro);
+  border-radius: var(--radio);
+  padding: 10px 6px;
+  margin-bottom: 16px;
+}
+
+.navBtn {
+  background: rgba(255,255,255,0.1);
+  color: var(--arena);
+  border: none;
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  font-size: 1.5rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s;
+}
+.navBtn:hover { background: rgba(255,255,255,0.2); }
+
+.mesLabel {
+  font-family: 'Fraunces', serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--arena);
+  letter-spacing: 0.02em;
+}
+
+.semana {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 6px;
+}
+
+.diaHeader {
+  text-align: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--texto-suave);
+  padding: 4px;
+  letter-spacing: 0.05em;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 20px;
+}
+
+.celdaVacia { height: 44px; }
+
+.celda {
+  height: 44px;
+  border-radius: var(--radio-sm);
+  border: 2px solid transparent;
+  background: var(--blanco);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  cursor: pointer;
+  transition: all 0.15s;
+  position: relative;
+}
+
+.celda:hover {
+  border-color: var(--verde-suave);
+  transform: scale(1.05);
+}
+
+.numDia {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--texto);
+}
+
+.hoy {
+  border-color: var(--verde-nopal) !important;
+  background: linear-gradient(135deg, #edf7e8, #d8f0cc);
+}
+.hoy .numDia { color: var(--verde-nopal); font-weight: 700; }
+
+.selec {
+  background: var(--verde-oscuro) !important;
+  border-color: var(--verde-oscuro) !important;
+  box-shadow: 0 4px 12px rgba(26,58,10,0.35);
+}
+.selec .numDia { color: white; }
+
+.conEntregas .numDia { font-weight: 700; }
+
+.punto {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+}
+.puntoPendiente { background: var(--terracota); }
+.puntoPagado { background: var(--verde-nopal); }
+
+/* Detalle */
+.detalle {
+  background: var(--blanco);
+  border-radius: var(--radio-lg);
+  padding: 20px;
+  box-shadow: var(--sombra);
+  animation: slideUp 0.3s cubic-bezier(.22,1,.36,1);
+  border-top: 4px solid var(--verde-nopal);
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.detalleHeader { margin-bottom: 16px; }
+
+.detalleTitulo {
+  font-size: 1.05rem;
+  color: var(--verde-oscuro);
+  margin-bottom: 6px;
+}
+
+.detalleSummary {
+  display: flex;
+  gap: 16px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--texto-suave);
+}
+
+.sinEntregas {
+  text-align: center;
+  color: var(--texto-suave);
+  font-size: 0.88rem;
+  padding: 16px 0;
+}
+
+.detalleList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.detalleItem {
+  background: var(--crema);
+  border-radius: var(--radio-sm);
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.detalleItem:hover { background: var(--arena); transform: translateX(3px); }
+
+.detalleCliente {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--texto);
+}
+
+.detalleInfo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  color: var(--texto-suave);
+}
+
+.btnAgregar {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, var(--verde-claro), var(--verde-nopal));
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 700;
+  border-radius: var(--radio-sm);
+  box-shadow: 0 3px 12px rgba(45,106,24,0.3);
+  margin-top: 4px;
+  transition: all 0.2s;
+}
+.btnAgregar:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(45,106,24,0.45); }

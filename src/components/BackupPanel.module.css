@@ -1,0 +1,81 @@
+.overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(26,58,10,0.55);
+  display: flex; align-items: flex-end; justify-content: center;
+  padding: 16px;
+}
+
+.panel {
+  width: 100%; max-width: 440px;
+  background: var(--crema);
+  border-radius: 24px 24px 20px 20px;
+  padding: 0 0 24px;
+  animation: slideUp 0.3s cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes slideUp {
+  from { transform: translateY(48px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 20px 14px;
+  border-bottom: 1.5px solid var(--arena-oscura);
+}
+
+.titulo { font-size: 1.15rem; color: var(--verde-oscuro); }
+
+.closeBtn {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--arena); font-size: 0.85rem;
+  display: flex; align-items: center; justify-content: center;
+}
+.closeBtn:hover { background: var(--arena-oscura); }
+
+.info {
+  padding: 14px 20px 0;
+  font-size: 0.83rem;
+  color: var(--texto-suave);
+  line-height: 1.5;
+}
+
+.acciones {
+  padding: 16px 20px 0;
+  display: flex; flex-direction: column; gap: 10px;
+}
+
+.btnExportar, .btnImportar {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 16px;
+  border-radius: var(--radio);
+  border: 2px solid var(--arena-oscura);
+  transition: all 0.2s; text-align: left; width: 100%;
+}
+.btnExportar { background: #edf7e8; border-color: var(--verde-suave); }
+.btnExportar:hover { background: #d8f0cc; }
+.btnImportar { background: #f5f0e8; border-color: var(--arena-oscura); }
+.btnImportar:hover { background: var(--arena); }
+
+.btnExportar span, .btnImportar span { font-size: 1.6rem; }
+
+.btnTitulo { font-weight: 700; font-size: 0.9rem; color: var(--texto); }
+.btnSub    { font-size: 0.75rem; color: var(--texto-suave); margin-top: 2px; }
+
+.msg {
+  margin: 14px 20px 0;
+  padding: 10px 14px;
+  border-radius: var(--radio-sm);
+  font-size: 0.83rem; font-weight: 600;
+}
+.msgOk    { background: #edf7e8; color: var(--verde-nopal); border: 1.5px solid #b8e0a0; }
+.msgError { background: #fff0eb; color: var(--terracota);   border: 1.5px solid #f0c4a8; }
+
+.aviso {
+  margin: 12px 20px 0;
+  font-size: 0.75rem;
+  color: var(--texto-suave);
+  padding: 8px 12px;
+  background: #fffbeb;
+  border-radius: 8px;
+  line-height: 1.4;
+}

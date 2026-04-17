@@ -1,0 +1,129 @@
+.page {
+  padding: 24px 16px 100px;
+  max-width: 480px;
+  margin: 0 auto;
+  animation: fadeIn 0.35s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.back {
+  background: var(--arena);
+  border: none;
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  font-size: 1.1rem;
+  color: var(--texto);
+  transition: background 0.2s;
+}
+.back:hover { background: var(--arena-oscura); }
+
+.titulo { font-size: 1.4rem; color: var(--verde-oscuro); }
+
+.vacio {
+  text-align: center;
+  padding: 60px 20px;
+}
+.vacio span { font-size: 4rem; display: block; margin-bottom: 16px; }
+.vacio p { font-size: 1.1rem; font-weight: 700; color: var(--verde-nopal); margin-bottom: 4px; }
+.vacio small { color: var(--texto-suave); }
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.item {
+  border-radius: var(--radio);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: fadeIn 0.4s ease both;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: var(--sombra);
+}
+
+.item:hover { transform: translateY(-2px); box-shadow: var(--sombra-hover); }
+
+.futuro {
+  background: linear-gradient(135deg, #fff3ee, #ffe8d6);
+  border-left: 4px solid var(--terracota);
+}
+
+.vencido {
+  background: linear-gradient(135deg, #f8f8f8, #f0f0f0);
+  border-left: 4px solid #bbb;
+  opacity: 0.75;
+}
+
+.itemFecha {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.itemFechaText {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--texto-suave);
+}
+
+.tagVencido {
+  font-size: 0.68rem;
+  background: #ddd;
+  color: #888;
+  padding: 2px 7px;
+  border-radius: 10px;
+  font-weight: 700;
+}
+
+.itemInfo {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.itemMonto {
+  font-family: 'Fraunces', serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--terracota);
+}
+
+.itemCliente {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--texto);
+}
+
+.itemTag {
+  font-size: 0.75rem;
+  color: var(--texto-suave);
+  font-weight: 600;
+}
+
+.info {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  background: var(--arena);
+  border-radius: var(--radio-sm);
+  padding: 14px;
+  margin-top: 24px;
+}
+
+.info span { font-size: 1.2rem; flex-shrink: 0; }
+.info p { font-size: 0.82rem; color: var(--texto-suave); line-height: 1.5; }
