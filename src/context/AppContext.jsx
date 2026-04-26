@@ -58,7 +58,7 @@ export function AppProvider({ children, userId }) {
     setEntregas(prev => [{ ...e, id: Date.now(), total }, ...prev])
     if (!clientes.includes(e.cliente)) setClientes(prev => [...prev, e.cliente].sort())
   }
-  const editarEntrega  = (id, d) => {
+  const editarEntrega = (id, d) => {
     const total = calcTotal(d.categorias)
     setEntregas(prev => prev.map(e => e.id === id ? { ...e, ...d, total } : e))
   }
@@ -66,11 +66,16 @@ export function AppProvider({ children, userId }) {
   const eliminarEntrega = (id) => setEntregas(prev => prev.filter(e => e.id !== id))
   const agregarCliente  = (n)  => { if (n && !clientes.includes(n)) setClientes(prev => [...prev, n].sort()) }
 
-  const totales = entregas.reduce((acc, e) => ({
-    pendiente: acc.pendiente + (!e.pagado ? e.total : 0),
-    cobrado:   acc.cobrado   + ( e.pagado ? e.total : 0),
-    cajas:     acc.cajas     + calcCajas(e.categorias),
-  }), { pendiente: 0, cobrado: 0, cajas: 0 })
+  // Totales separados: dinero pendiente, cobrado, cajas pendientes y cajas cobradas
+  const totales = entregas.reduce((acc, e) => {
+    const cajas = calcCajas(e.categorias)
+    return {
+      pendiente:      acc.pendiente      + (!e.pagado ? e.total : 0),
+      cobrado:        acc.cobrado        + ( e.pagado ? e.total : 0),
+      cajasPendiente: acc.cajasPendiente + (!e.pagado ? cajas   : 0),
+      cajasCobradas:  acc.cajasCobradas  + ( e.pagado ? cajas   : 0),
+    }
+  }, { pendiente: 0, cobrado: 0, cajasPendiente: 0, cajasCobradas: 0 })
 
   const exportar = () => exportarBackup(userId, entregas, clientes)
   const importar = async (file) => {
@@ -88,3 +93,4 @@ export function AppProvider({ children, userId }) {
 }
 
 export const useApp = () => useContext(AppCtx)
+

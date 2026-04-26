@@ -1,122 +1,148 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import { useAuth } from '../context/AuthContext'
 import BackupPanel from '../components/BackupPanel'
 import styles from './Dashboard.module.css'
 
-const fmt = (n) => `$${n.toLocaleString('es-MX')}`
+const fmt  = (n) => `$${n.toLocaleString('es-MX')}`
+const fmtF = (s) => { const [,m,d]=s.split('-'); return `${d} ${['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'][+m-1]}` }
+const diasRest = (fin) => fin ? Math.ceil((new Date(fin)-new Date())/86400000) : null
 
-const fmtFecha = (str) => {
-  const [, m, d] = str.split('-')
-  const meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']
-  return `${d} ${meses[parseInt(m)-1]}`
-}
-
-const diasRestantes = (fin) => {
-  if (!fin) return null
-  return Math.ceil((new Date(fin) - new Date()) / 86400000)
+// Genera los recordatorios pendientes para mostrar al entrar
+const getRecordatorios = (entregas) => {
+  const hoy = new Date(); hoy.setHours(0,0,0,0)
+  const manana = new Date(hoy); manana.setDate(hoy.getDate()+1)
+  const resultado = []
+  entregas.filter(e => !e.pagado).forEach(e => {
+    const rec = e.recordatorio || 3
+    for (let i = 1; i <= 3; i++) {
+      const f = new Date(e.fecha+'T12:00:00')
+      f.setDate(f.getDate() + rec * i)
+      // Solo los de hoy y mañana
+      if (f >= hoy && f < new Date(manana.getTime() + 86400000)) {
+        resultado.push({ id:`${e.id}-${i}`, cliente: e.cliente, total: e.total, fecha: f, eid: e.id })
+      }
+    }
+  })
+  return resultado
 }
 
 export default function Dashboard() {
   const { entregas, totales } = useApp()
   const { profile, logout, isAdmin } = useAuth()
   const nav = useNavigate()
-  const [showBackup, setShowBackup] = useState(false)
-  const [showMenu, setShowMenu] = useState(false)
-  const ultimas = entregas.slice(0, 4)
+  const [backup, setBackup] = useState(false)
+  const [menu,   setMenu]   = useState(false)
+  const [notif,  setNotif]  = useState(false)
 
-  const dias = diasRestantes(profile?.suscripcion_fin)
-  const subAlerta = dias !== null && dias <= 7
+  const ultimas = entregas.slice(0, 4)
+  const dias    = diasRest(profile?.suscripcion_fin)
+  const alerta  = dias !== null && dias <= 7
+  const recordatoriosHoy = getRecordatorios(entregas)
+
+  // Mostrar notificación automáticamente al entrar si hay recordatorios
+  useEffect(() => {
+    if (recordatoriosHoy.length > 0) {
+      const timer = setTimeout(() => setNotif(true), 600)
+      return () => clearTimeout(timer)
+    }
+  }, []) // eslint-disable-line
 
   return (
     <div className={styles.page}>
-      {/* Header con usuario */}
+
+      {/* Header */}
       <div className={styles.header}>
         <div className={styles.logoRow}>
           <div className={styles.logo}>🌵</div>
           <div>
             <h1 className={styles.titulo}>Control Nopal</h1>
-            <p className={styles.subtitulo}>
-              {profile?.nombre || profile?.email?.split('@')[0] || 'Usuario'}
-            </p>
+            <p className={styles.sub}>{profile?.nombre || profile?.email?.split('@')[0] || 'Usuario'}</p>
           </div>
         </div>
-        <div className={styles.headerRight}>
-          <button className={styles.menuBtn} onClick={() => setShowMenu(v => !v)}>⋯</button>
-          {showMenu && (
-            <div className={styles.menuDrop} onClick={() => setShowMenu(false)}>
-              <button className={styles.menuItem} onClick={() => setShowBackup(true)}>💾 Respaldo</button>
-              {isAdmin && (
-                <button className={styles.menuItem} onClick={() => nav('/admin')}>⚙️ Panel Admin</button>
-              )}
-              <button className={`${styles.menuItem} ${styles.menuLogout}`}
-                onClick={() => logout()}>🚪 Cerrar sesión</button>
+        <div className={styles.menuWrap}>
+          <button className={styles.menuBtn} onClick={() => setMenu(v => !v)}>⋯</button>
+          {menu && (
+            <div className={styles.drop}>
+              <button className={styles.dropItem} onClick={() => { setBackup(true); setMenu(false) }}>💾 Respaldo</button>
+              {isAdmin && <button className={styles.dropItem} onClick={() => nav('/admin')}>⚙️ Panel Admin</button>}
+              <button className={`${styles.dropItem} ${styles.dropLogout}`} onClick={() => logout()}>🚪 Cerrar sesión</button>
             </div>
           )}
+          {menu && <div className={styles.backdrop} onClick={() => setMenu(false)} />}
         </div>
       </div>
 
       {/* Alerta suscripción */}
-      {subAlerta && (
-        <div className={`${styles.subAlerta} ${dias <= 0 ? styles.subVencida : ''}`}>
+      {alerta && (
+        <div className={`${styles.subAlert} ${dias <= 0 ? styles.subVenc : ''}`}>
           {dias <= 0
-            ? '❌ Tu suscripción ha vencido. Contacta al administrador.'
-            : `⚠️ Tu suscripción vence en ${dias} día${dias !== 1 ? 's' : ''}. Contacta al administrador para renovar.`
-          }
+            ? '❌ Suscripción vencida. Contacta al administrador.'
+            : `⚠️ Tu suscripción vence en ${dias} día${dias !== 1 ? 's' : ''}. Contacta para renovar.`}
         </div>
       )}
 
-      {/* Resumen cards */}
+      {/* Cards — dinero */}
       <div className={styles.cards}>
-        <div className={`${styles.card} ${styles.cardPendiente}`}>
-          <span className={styles.cardIcon}>💰</span>
+        <div className={`${styles.card} ${styles.cPend}`}>
+          <span className={styles.cIcon}>💰</span>
           <div>
-            <div className={styles.cardLabel}>Pendiente</div>
-            <div className={styles.cardValor}>{fmt(totales.pendiente)}</div>
+            <div className={styles.cLbl}>Por cobrar</div>
+            <div className={styles.cVal}>{fmt(totales.pendiente)}</div>
           </div>
         </div>
-        <div className={`${styles.card} ${styles.cardCobrado}`}>
-          <span className={styles.cardIcon}>✅</span>
+        <div className={`${styles.card} ${styles.cCob}`}>
+          <span className={styles.cIcon}>✅</span>
           <div>
-            <div className={styles.cardLabel}>Cobrado</div>
-            <div className={styles.cardValor}>{fmt(totales.cobrado)}</div>
+            <div className={styles.cLbl}>Cobrado</div>
+            <div className={styles.cVal}>{fmt(totales.cobrado)}</div>
           </div>
         </div>
-        <div className={`${styles.card} ${styles.cardCajas}`}>
-          <span className={styles.cardIcon}>📦</span>
+      </div>
+
+      {/* Cards — cajas separadas */}
+      <div className={styles.cards}>
+        <div className={`${styles.card} ${styles.cCajPend}`}>
+          <span className={styles.cIcon}>📦</span>
           <div>
-            <div className={styles.cardLabel}>Cajas totales</div>
-            <div className={styles.cardValor}>{totales.cajas}</div>
+            <div className={styles.cLbl}>Cajas entregadas</div>
+            <div className={styles.cVal}>{totales.cajasPendiente}</div>
+          </div>
+        </div>
+        <div className={`${styles.card} ${styles.cCajCob}`}>
+          <span className={styles.cIcon}>📫</span>
+          <div>
+            <div className={styles.cLbl}>Cajas cobradas</div>
+            <div className={styles.cVal}>{totales.cajasCobradas}</div>
           </div>
         </div>
       </div>
 
       {/* Botón nueva entrega */}
-      <button className={styles.btnNueva} onClick={() => nav('/nueva')}>
-        <span>➕</span> Nueva entrega
-      </button>
+      <button className={styles.btnNueva} onClick={() => nav('/nueva')}>➕ Nueva entrega</button>
 
       {/* Últimas entregas */}
-      <div className={styles.seccion}>
-        <div className={styles.seccionHeader}>
-          <h2 className={styles.seccionTitulo}>📋 Últimas entregas</h2>
+      <div className={styles.sec}>
+        <div className={styles.secH}>
+          <h2 className={styles.secT}>📋 Últimas entregas</h2>
           <button className={styles.verTodas} onClick={() => nav('/entregas')}>Ver todas →</button>
         </div>
         <div className={styles.lista}>
           {ultimas.length === 0 && (
-            <div className={styles.sinEntregas}>
+            <div className={styles.vacio}>
               <span>📭</span>
-              <p>Aún no hay entregas.<br/>¡Registra la primera!</p>
+              <p>Aún no hay entregas. ¡Registra la primera!</p>
             </div>
           )}
           {ultimas.map((e, i) => (
-            <div key={e.id} className={styles.item} style={{ animationDelay: `${i * 0.07}s` }}>
-              <div className={styles.itemFecha}>{fmtFecha(e.fecha)}</div>
-              <div className={styles.itemInfo}>
-                <span className={styles.itemCliente}>{e.cliente.split(' ')[0]}</span>
-                <span className={styles.itemDetalle}>
-                  {(e.categorias||[]).reduce((s,c)=>s+(Number(c.cajas)||0),0)} cajas · {fmt(e.total)}
+            <div key={e.id} className={styles.item} style={{ animationDelay:`${i*.07}s` }}
+              onClick={() => nav(`/editar/${e.id}`)}>
+              <div className={styles.itemF}>{fmtF(e.fecha)}</div>
+              <div className={styles.itemI}>
+                <span className={styles.itemC}>{e.cliente.split(' ')[0]}</span>
+                <span className={styles.itemD}>
+                  {(e.categorias||[]).reduce((s,c) => s+(Number(c.cajas)||0), 0)} cajas · {fmt(e.total)}
                 </span>
               </div>
               <span className={e.pagado ? 'badge-pagado' : 'badge-pendiente'}>
@@ -127,24 +153,42 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Acceso rápido */}
+      {/* Accesos rápidos */}
       <div className={styles.accesos}>
-        <button className={styles.acceso} onClick={() => nav('/notificaciones')}>
-          <span>🔔</span><span>Recordatorios</span>
+        <button className={styles.acc} onClick={() => nav('/notificaciones')}>
+          <span>🔔</span>
+          <span>Recordatorios{recordatoriosHoy.length > 0 ? ` (${recordatoriosHoy.length})` : ''}</span>
         </button>
-        <button className={styles.acceso} onClick={() => nav('/graficas')}>
-          <span>📊</span><span>Gráficas</span>
-        </button>
-        <button className={styles.acceso} onClick={() => setShowBackup(true)}>
-          <span>💾</span><span>Respaldo</span>
-        </button>
+        <button className={styles.acc} onClick={() => nav('/graficas')}><span>📊</span><span>Gráficas</span></button>
+        <button className={styles.acc} onClick={() => setBackup(true)}><span>💾</span><span>Respaldo</span></button>
       </div>
 
-      {/* Backdrop del menú */}
-      {showMenu && <div className={styles.menuBackdrop} onClick={() => setShowMenu(false)} />}
+      {/* Modal notificaciones al entrar */}
+      {notif && (
+        <div className={styles.notifOv} onClick={() => setNotif(false)}>
+          <div className={styles.notifPanel} onClick={e => e.stopPropagation()}>
+            <div className={styles.notifHdr}>
+              <span className={styles.notifIco}>🔔</span>
+              <h2 className={styles.notifTit}>Recordatorios de hoy</h2>
+              <button className={styles.notifCls} onClick={() => setNotif(false)}>✕</button>
+            </div>
+            <div className={styles.notifLista}>
+              {recordatoriosHoy.map(r => (
+                <div key={r.id} className={styles.notifItem}
+                  onClick={() => { setNotif(false); nav(`/editar/${r.eid}`) }}>
+                  <div className={styles.notifCliente}>👤 {r.cliente}</div>
+                  <div className={styles.notifMonto}>💰 Cobrar {fmt(r.total)}</div>
+                </div>
+              ))}
+            </div>
+            <button className={styles.notifBtn} onClick={() => { setNotif(false); nav('/notificaciones') }}>
+              Ver todos los recordatorios →
+            </button>
+          </div>
+        </div>
+      )}
 
-      {/* Panel de respaldo */}
-      {showBackup && <BackupPanel onClose={() => setShowBackup(false)} />}
+      {backup && <BackupPanel onClose={() => setBackup(false)} />}
     </div>
   )
 }
