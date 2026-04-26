@@ -189,3 +189,123 @@
   color: var(--texto-suave);
   margin-top: 20px;
 }
+
+
+.checkLbl {
+  font-size: .88rem;
+  font-weight: 600;
+  color: var(--texto-suave);
+  pointer-events: none;
+}
+
+
+.page {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  padding: 24px 16px; position: relative; overflow: hidden;
+  background: linear-gradient(160deg, #0f2206 0%, #1a3a0a 40%, #2d6a18 100%);
+}
+.bg { position: absolute; inset: 0; pointer-events: none; }
+.n1 { position: absolute; top: 8%; left: -16px; font-size: 8rem; opacity: 0.07; transform: rotate(-15deg); }
+.n2 { position: absolute; bottom: 4%; right: -8px; font-size: 10rem; opacity: 0.06; transform: rotate(10deg); }
+
+.card {
+  width: 100%; max-width: 400px;
+  background: #faf6ee;
+  border-radius: 24px; padding: 32px 24px 24px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.4);
+  position: relative; z-index: 1;
+  animation: slideUp 0.5s cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes slideUp { from { opacity:0; transform:translateY(32px); } to { opacity:1; transform:translateY(0); } }
+
+.logoWrap { text-align: center; margin-bottom: 24px; }
+.logo {
+  font-size: 3.2rem; display: block; margin-bottom: 6px;
+  filter: drop-shadow(0 4px 12px rgba(45,106,24,0.4));
+  animation: float 3s ease-in-out infinite;
+}
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+.titulo { font-family: 'Fraunces',serif; font-size: 1.8rem; color: #1a3a0a; letter-spacing: -0.02em; }
+.sub { font-size: 0.83rem; color: #7a5c3e; margin-top: 4px; }
+
+.demoBanner {
+  background: #fffbeb; border: 1.5px solid #f5c842;
+  border-radius: 10px; padding: 10px 14px;
+  font-size: 0.8rem; color: #92620a; line-height: 1.5;
+  margin-bottom: 18px; text-align: center;
+}
+
+.form { display: flex; flex-direction: column; gap: 16px; }
+.campo { display: flex; flex-direction: column; gap: 6px; }
+.label { font-size: 0.8rem; font-weight: 700; color: #7a5c3e; letter-spacing: 0.02em; }
+.input {
+  width: 100%; padding: 13px 16px;
+  background: #fff; border: 2px solid #e8d0a0;
+  border-radius: 10px; font-size: 1rem; color: #2c1a0e;
+  transition: border-color .2s, box-shadow .2s; -webkit-appearance: none;
+  font-family: inherit;
+}
+.input:focus { border-color: #2d6a18; box-shadow: 0 0 0 3px rgba(45,106,24,.12); outline: none; }
+.passWrap { position: relative; }
+.passWrap .input { padding-right: 46px; }
+.eyeBtn { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 1.1rem; cursor: pointer; padding: 4px; }
+.errorBox {
+  display: flex; align-items: center; gap: 8px;
+  background: #fff0eb; border: 1.5px solid #f0c4a8;
+  border-radius: 10px; padding: 10px 14px;
+  font-size: 0.83rem; font-weight: 600; color: #c4622d;
+}
+.btnLogin {
+  width: 100%; padding: 15px;
+  background: linear-gradient(135deg, #4a9e2f, #2d6a18);
+  color: #fff; font-size: 1rem; font-weight: 700; border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(45,106,24,.4);
+  transition: all .2s; display: flex; align-items: center; justify-content: center; gap: 8px;
+  margin-top: 4px; font-family: inherit;
+}
+.btnLogin:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(45,106,24,.5); }
+.btnLogin:disabled { opacity: .7; cursor: not-allowed; }
+.spinner {
+  width: 20px; height: 20px;
+  border: 2.5px solid rgba(255,255,255,.3); border-top-color: #fff;
+  border-radius: 50%; animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.footer { text-align: center; font-size: 0.75rem; color: #7a5c3e; margin-top: 18px; line-height: 1.4; }
+
+/* ── Recordar usuario ── */
+
+/* ── Recordar correo ── */
+.checkRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+  padding: 2px 0;
+  -webkit-tap-highlight-color: transparent;
+}
+.checkbox {
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+  border: 2px solid var(--arena-oscura);
+  background: var(--blanco);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .2s;
+  flex-shrink: 0;
+  pointer-events: none;
+}
+.checkOn {
+  background: var(--verde-nopal);
+  border-color: var(--verde-nopal);
+}
+.checkMark {
+  color: white;
+  font-size: .9rem;
+  font-weight: 800;
+  line-height: 1;
+  pointer-events: none;
+}

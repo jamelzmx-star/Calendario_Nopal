@@ -5,7 +5,7 @@ import styles from './Login.module.css'
 
 export default function Login() {
   const { login, loading, error, setError, modoDemo, emailRecordado } = useAuth()
-  const navigate = useNavigate()
+  const navigate  = useNavigate()
   const [email,    setEmail]    = useState(emailRecordado || (modoDemo ? 'demo@nopal.com' : ''))
   const [pass,     setPass]     = useState(modoDemo ? 'demo1234' : '')
   const [show,     setShow]     = useState(false)
@@ -70,22 +70,20 @@ export default function Login() {
                 autoComplete="current-password"
                 disabled={busy}
               />
-              <button type="button" className={styles.eyeBtn} onClick={() => setShow(v => !v)}>
+              <button type="button" className={styles.eyeBtn}
+                onClick={() => setShow(v => !v)}>
                 {show ? '🙈' : '👁️'}
               </button>
             </div>
           </div>
 
-          {/* Recordar usuario */}
-          <label className={styles.checkRow}>
-            <div
-              className={`${styles.checkbox} ${recordar ? styles.checkOn : ''}`}
-              onClick={() => setRecordar(v => !v)}
-            >
+          {/* Recordar correo */}
+          <div className={styles.checkRow} onClick={() => setRecordar(v => !v)}>
+            <div className={`${styles.checkbox} ${recordar ? styles.checkOn : ''}`}>
               {recordar && <span className={styles.checkMark}>✓</span>}
             </div>
             <span className={styles.checkLbl}>Recordar mi correo</span>
-          </label>
+          </div>
 
           {error && <div className={styles.errorBox}>⚠️ {error}</div>}
 
