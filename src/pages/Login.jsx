@@ -4,23 +4,24 @@ import { useAuth } from '../context/AuthContext'
 import styles from './Login.module.css'
 
 export default function Login() {
-  const { login, loading, error, setError, modoDemo } = useAuth()
+  const { login, loading, error, setError, modoDemo, emailRecordado } = useAuth()
   const navigate = useNavigate()
-  const [email, setEmail] = useState(modoDemo ? 'demo@nopal.com' : '')
-  const [pass,  setPass]  = useState(modoDemo ? 'demo1234' : '')
-  const [show,  setShow]  = useState(false)
-  const [local, setLocal] = useState(false)
+  const [email,    setEmail]    = useState(emailRecordado || (modoDemo ? 'demo@nopal.com' : ''))
+  const [pass,     setPass]     = useState(modoDemo ? 'demo1234' : '')
+  const [show,     setShow]     = useState(false)
+  const [recordar, setRecordar] = useState(!!emailRecordado)
+  const [local,    setLocal]    = useState(false)
+
+  const busy = loading || local
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLocal(true)
     setError(null)
-    const ok = await login(email.trim(), pass)
+    const ok = await login(email.trim(), pass, recordar)
     setLocal(false)
     if (ok) navigate('/')
   }
-
-  const busy = loading || local
 
   return (
     <div className={styles.page}>
@@ -38,7 +39,7 @@ export default function Login() {
 
         {modoDemo && (
           <div className={styles.demoBanner}>
-            <strong>⚡ Modo demo</strong><br/>
+            <strong>⚡ Modo demo</strong><br />
             demo@nopal.com / demo1234
           </div>
         )}
@@ -69,16 +70,24 @@ export default function Login() {
                 autoComplete="current-password"
                 disabled={busy}
               />
-              <button type="button" className={styles.eyeBtn}
-                onClick={() => setShow(v => !v)}>
+              <button type="button" className={styles.eyeBtn} onClick={() => setShow(v => !v)}>
                 {show ? '🙈' : '👁️'}
               </button>
             </div>
           </div>
 
-          {error && (
-            <div className={styles.errorBox}>⚠️ {error}</div>
-          )}
+          {/* Recordar usuario */}
+          <label className={styles.checkRow}>
+            <div
+              className={`${styles.checkbox} ${recordar ? styles.checkOn : ''}`}
+              onClick={() => setRecordar(v => !v)}
+            >
+              {recordar && <span className={styles.checkMark}>✓</span>}
+            </div>
+            <span className={styles.checkLbl}>Recordar mi correo</span>
+          </label>
+
+          {error && <div className={styles.errorBox}>⚠️ {error}</div>}
 
           <button type="submit" className={styles.btnLogin} disabled={busy}>
             {busy ? <span className={styles.spinner} /> : '🚪 Entrar'}

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import { useAuth } from '../context/AuthContext'
@@ -9,45 +9,73 @@ const fmt  = (n) => `$${n.toLocaleString('es-MX')}`
 const fmtF = (s) => { const [,m,d]=s.split('-'); return `${d} ${['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'][+m-1]}` }
 const diasRest = (fin) => fin ? Math.ceil((new Date(fin)-new Date())/86400000) : null
 
-// Genera los recordatorios pendientes para mostrar al entrar
-const getRecordatorios = (entregas) => {
-  const hoy = new Date(); hoy.setHours(0,0,0,0)
-  const manana = new Date(hoy); manana.setDate(hoy.getDate()+1)
-  const resultado = []
+// Genera recordatorios para HOY:
+// A partir del día seleccionado (1, 3 ó 7) se dispara TODOS LOS DÍAS siguientes
+// hasta que se pague. Solo muestra los de hoy.
+const getRecordatoriosHoy = (entregas) => {
+  const hoy = new Date()
+  hoy.setHours(0, 0, 0, 0)
+
+  const result = []
   entregas.filter(e => !e.pagado).forEach(e => {
+    const inicio = new Date(e.fecha + 'T12:00:00')
+    const diasDesdeEntrega = Math.floor((hoy - inicio) / 86400000)
     const rec = e.recordatorio || 3
-    for (let i = 1; i <= 3; i++) {
-      const f = new Date(e.fecha+'T12:00:00')
-      f.setDate(f.getDate() + rec * i)
-      // Solo los de hoy y mañana
-      if (f >= hoy && f < new Date(manana.getTime() + 86400000)) {
-        resultado.push({ id:`${e.id}-${i}`, cliente: e.cliente, total: e.total, fecha: f, eid: e.id })
-      }
+
+    // El primer recordatorio es en el día `rec`, luego cada día después de eso
+    // diasDesdeEntrega >= rec significa que ya pasó el umbral
+    if (diasDesdeEntrega >= rec) {
+      result.push({
+        id:      e.id,
+        cliente: e.cliente,
+        total:   e.total,
+        cajas:   (e.categorias || []).reduce((s, c) => s + (Number(c.cajas) || 0), 0),
+        dias:    diasDesdeEntrega,
+        fecha:   e.fecha,
+      })
     }
   })
-  return resultado
+
+  // Ordenar por más urgente (más días sin cobrar primero)
+  return result.sort((a, b) => b.dias - a.dias)
 }
 
 export default function Dashboard() {
   const { entregas, totales } = useApp()
   const { profile, logout, isAdmin } = useAuth()
   const nav = useNavigate()
-  const [backup, setBackup] = useState(false)
-  const [menu,   setMenu]   = useState(false)
-  const [notif,  setNotif]  = useState(false)
+  const [backup,   setBackup]   = useState(false)
+  const [menu,     setMenu]     = useState(false)
+  const [notifIdx, setNotifIdx] = useState(0)  // índice del carrusel
+  const [notifAbierto, setNotifAbierto] = useState(false)
+  const [dismissedKey] = useState(() => {
+    const hoy = new Date().toISOString().split('T')[0]
+    return `nopal-notif-dismissed-${hoy}`
+  })
 
   const ultimas = entregas.slice(0, 4)
   const dias    = diasRest(profile?.suscripcion_fin)
   const alerta  = dias !== null && dias <= 7
-  const recordatoriosHoy = getRecordatorios(entregas)
+  const recs    = getRecordatoriosHoy(entregas)
 
-  // Mostrar notificación automáticamente al entrar si hay recordatorios
+  // Mostrar notificación al entrar solo si hay recordatorios y no se descartó hoy
   useEffect(() => {
-    if (recordatoriosHoy.length > 0) {
-      const timer = setTimeout(() => setNotif(true), 600)
-      return () => clearTimeout(timer)
+    if (recs.length > 0 && !sessionStorage.getItem(dismissedKey)) {
+      const t = setTimeout(() => setNotifAbierto(true), 700)
+      return () => clearTimeout(t)
     }
   }, []) // eslint-disable-line
+
+  const cerrarNotif = useCallback(() => {
+    setNotifAbierto(false)
+    // Marcar como visto para esta sesión
+    sessionStorage.setItem(dismissedKey, '1')
+  }, [dismissedKey])
+
+  const prev = () => setNotifIdx(i => (i - 1 + recs.length) % recs.length)
+  const next = () => setNotifIdx(i => (i + 1) % recs.length)
+
+  const recActual = recs[notifIdx]
 
   return (
     <div className={styles.page}>
@@ -83,7 +111,7 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Cards — dinero */}
+      {/* Cards dinero */}
       <div className={styles.cards}>
         <div className={`${styles.card} ${styles.cPend}`}>
           <span className={styles.cIcon}>💰</span>
@@ -101,7 +129,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Cards — cajas separadas */}
+      {/* Cards cajas */}
       <div className={styles.cards}>
         <div className={`${styles.card} ${styles.cCajPend}`}>
           <span className={styles.cIcon}>📦</span>
@@ -119,7 +147,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Botón nueva entrega */}
       <button className={styles.btnNueva} onClick={() => nav('/nueva')}>➕ Nueva entrega</button>
 
       {/* Últimas entregas */}
@@ -130,10 +157,7 @@ export default function Dashboard() {
         </div>
         <div className={styles.lista}>
           {ultimas.length === 0 && (
-            <div className={styles.vacio}>
-              <span>📭</span>
-              <p>Aún no hay entregas. ¡Registra la primera!</p>
-            </div>
+            <div className={styles.vacio}><span>📭</span><p>Aún no hay entregas. ¡Registra la primera!</p></div>
           )}
           {ultimas.map((e, i) => (
             <div key={e.id} className={styles.item} style={{ animationDelay:`${i*.07}s` }}
@@ -155,34 +179,67 @@ export default function Dashboard() {
 
       {/* Accesos rápidos */}
       <div className={styles.accesos}>
-        <button className={styles.acc} onClick={() => nav('/notificaciones')}>
+        <button className={styles.acc} onClick={() => { setNotifIdx(0); setNotifAbierto(true) }}>
           <span>🔔</span>
-          <span>Recordatorios{recordatoriosHoy.length > 0 ? ` (${recordatoriosHoy.length})` : ''}</span>
+          <span>Cobros{recs.length > 0 ? ` (${recs.length})` : ''}</span>
         </button>
         <button className={styles.acc} onClick={() => nav('/graficas')}><span>📊</span><span>Gráficas</span></button>
         <button className={styles.acc} onClick={() => setBackup(true)}><span>💾</span><span>Respaldo</span></button>
       </div>
 
-      {/* Modal notificaciones al entrar */}
-      {notif && (
-        <div className={styles.notifOv} onClick={() => setNotif(false)}>
+      {/* ── Modal carrusel de recordatorios ── */}
+      {notifAbierto && (
+        <div className={styles.notifOv} onClick={cerrarNotif}>
           <div className={styles.notifPanel} onClick={e => e.stopPropagation()}>
+
             <div className={styles.notifHdr}>
-              <span className={styles.notifIco}>🔔</span>
-              <h2 className={styles.notifTit}>Recordatorios de hoy</h2>
-              <button className={styles.notifCls} onClick={() => setNotif(false)}>✕</button>
+              <span>🔔</span>
+              <h2 className={styles.notifTit}>
+                {recs.length === 0 ? 'Sin cobros pendientes' : `Cobros pendientes${recs.length > 1 ? ` (${notifIdx + 1}/${recs.length})` : ''}`}
+              </h2>
+              <button className={styles.notifCls} onClick={cerrarNotif}>✕</button>
             </div>
-            <div className={styles.notifLista}>
-              {recordatoriosHoy.map(r => (
-                <div key={r.id} className={styles.notifItem}
-                  onClick={() => { setNotif(false); nav(`/editar/${r.eid}`) }}>
-                  <div className={styles.notifCliente}>👤 {r.cliente}</div>
-                  <div className={styles.notifMonto}>💰 Cobrar {fmt(r.total)}</div>
+
+            {recs.length === 0 ? (
+              <div className={styles.notifVacio}>
+                <span>🎉</span>
+                <p>¡Todo al corriente!</p>
+              </div>
+            ) : (
+              <>
+                {/* Tarjeta actual */}
+                <div className={styles.notifCard}
+                  onClick={() => { cerrarNotif(); nav(`/editar/${recActual.id}`) }}>
+                  <div className={styles.notifDias}>
+                    ⏰ {recActual.dias} día{recActual.dias !== 1 ? 's' : ''} sin cobrar
+                  </div>
+                  <div className={styles.notifCliente}>👤 {recActual.cliente}</div>
+                  <div className={styles.notifMonto}>{fmt(recActual.total)}</div>
+                  <div className={styles.notifCajas}>📦 {recActual.cajas} cajas · {fmtF(recActual.fecha)}</div>
+                  <div className={styles.notifTap}>Toca para ir a la entrega →</div>
                 </div>
-              ))}
-            </div>
-            <button className={styles.notifBtn} onClick={() => { setNotif(false); nav('/notificaciones') }}>
-              Ver todos los recordatorios →
+
+                {/* Controles carrusel */}
+                {recs.length > 1 && (
+                  <div className={styles.carrusel}>
+                    <button className={styles.carBtn} onClick={prev}>‹</button>
+                    <div className={styles.carDots}>
+                      {recs.map((_, i) => (
+                        <button
+                          key={i}
+                          className={`${styles.dot} ${i === notifIdx ? styles.dotOn : ''}`}
+                          onClick={() => setNotifIdx(i)}
+                        />
+                      ))}
+                    </div>
+                    <button className={styles.carBtn} onClick={next}>›</button>
+                  </div>
+                )}
+              </>
+            )}
+
+            <button className={styles.notifBtn} onClick={cerrarNotif}>
+              Cerrar
             </button>
           </div>
         </div>
