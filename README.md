@@ -1,3 +1,6 @@
+# Enlace 🌵 Control Nopal
+https://jamelzmx-star.github.io/Calendario_Nopal/#/login
+
 # 🌵 Control Nopal
 
 App móvil para gestión de entregas y cobros de nopal, con **login via Supabase** y panel de administración.
